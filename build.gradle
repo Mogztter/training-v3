@@ -155,7 +155,8 @@ subprojects {
     //noinspection GroovyAccessibility,GroovyAssignabilityCheck
     asciidoctorj {
       modules.pdf.version '1.5.2'
-      attributes 'pdf-style': "${rootProject.projectDir}/resources/themes/pdf-theme.yml"
+      attributes 'pdf-style': "${rootProject.projectDir}/resources/themes/pdf-theme.yml",
+        'imagesdir': '../images'
     }
 
     baseDir file("${projectDir}/docs")

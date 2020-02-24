@@ -1,4 +1,3 @@
-
 = Overview of Neo4j Administration
 :doctype: book
 :toc: left
@@ -48,7 +47,7 @@ There are also  a set of other language drivers written by the Neo4j community.
 A Neo4j client can only access a single database at a time.
 --
 
-image::bolt-diagram.png[bolt-diagram,width=400,align=center]
+image::{imagedir}/bolt-diagram.png[bolt-diagram,width=400,align=center]
 
 == Extending Neo4j
 [.notes]
@@ -90,7 +89,7 @@ Neo4j-supported and some community drivers use the Bolt protocol.
 The clients can be JVMs, .NET resources, a Web server, all of which can be accessed by an end-user.
 --
 
-image::Neo4jServerClients.png[Neo4jClients,width=600,align=center]
+image::{imagedir}/Neo4jServerClients.png[Neo4jClients,width=600,align=center]
 
 [.statement]
 As a Neo4j database administrator, you are responsible for the availability and consistency of the Neo4j databases used by the clients.
@@ -104,7 +103,7 @@ Data can be fetched from the different systems in order to be manipulated by an 
 Other solutions can involve loading of data from a number of databases into Neo4j in order to efficiently do connected data analysis on the combined data set.
 --
 
-image::Polyglot.png[Polyglot,width=700,align=center]
+image::{imagedir}/Polyglot.png[Polyglot,width=700,align=center]
 
 === Microservices
 
@@ -114,7 +113,7 @@ With cloud-hosted microservices, the implementation chosen for the microservice 
 In a cloud-based microservice architecture, there may be a number of services that Neo4j can provide to the end-users.
 --
 
-image::Microservices.png[Microservices,width=600,align=center]
+image::{imagedir}/Microservices.png[Microservices,width=600,align=center]
 
 [.statement]
 As a Neo4j database administrator, you are responsible for the availability and consistency of the Neo4j database(s), and for making the data accessible by applications.
@@ -131,7 +130,7 @@ With Causal Clusters, you configure multiple Neo4j instances that communicate wi
 Causal Clusters are used when data needs to reside in multiple physical locations, or if you want to implement a high availability architecture where access to data will not be affected if a Neo4j instance goes down.
 --
 
-image::ClustersHighLevel.png[ClustersHighLevel,width=700,align=center]
+image::{imagedir}/ClustersHighLevel.png[ClustersHighLevel,width=700,align=center]
 
 === Distributed servers in a cluster
 
@@ -140,7 +139,7 @@ image::ClustersHighLevel.png[ClustersHighLevel,width=700,align=center]
 A common use for Neo4j is when different data is required in a set of geographic locations. For example, an  online retailer may have different data in the US and Europe. Some data could be shared between different geographically located data centers, but the most heavily updated data needs to physically reside closer to the end-user applications. Neo4j Causal Clusters can be configured to span geographic locations.
 --
 
-image::ClustersHighLevelDistributed.png[ClustersHighLevelDistributed,width=800,align=center]
+image::{imagedir}/ClustersHighLevelDistributed.png[ClustersHighLevelDistributed,width=800,align=center]
 
 [.statement]
 As a Neo4j database administrator, you will be responsible for configuring and monitoring Causal Clusters.
@@ -174,7 +173,7 @@ The following are two common patterns this use case:
 . Neo4j is used to find and analyze connections in data from other data sources. To cater for this, the Neo4j database is loaded with data from several sources. As a Neo4j database administrator, you will ensure that the Neo4j database used for this purpose is kept up-to-date and that the data is secure and appropriately backed up.
 . Data scientists analyze the data in a Neo4j production database. In order to safeguard the production database from potentially heavy queries, a dedicated Read Replica is configured (Causal Cluster) . In this case, the analytics database is always up-to-date with the production database, and its administration is a part of the regular Causal Cluster maintenance work (see Example architecture #3).
 
-image::DataAnalytics.png[DataAnalytics,width=300,align=center]
+image::{imagedir}/DataAnalytics.png[DataAnalytics,width=300,align=center]
 
 === Example architecture #5: Neo4j integrated with compute-heavy solutions
 
@@ -184,7 +183,7 @@ Some enterprises need to consolidate large amounts of data for analysis. The dat
 A common  architecture for streaming and analyzing data for consolidation is Apache Spark.
 --
 
-image::GraphCompute.png[GraphCompute,width=800,align=center]
+image::{imagedir}/GraphCompute.png[GraphCompute,width=800,align=center]
 
 [.statement]
 As a Neo4j database administrator, you will work with architects to ensure that the Neo4j database in this type of environment is properly configured and available to the computational engines that will write to the graph.
@@ -288,7 +287,7 @@ This is the most common deployment, and it is recommended for all on-site deploy
 In this architecture, Neo4j runs as a database server and can be accessed through binary and http APIs for data querying and updating.
 --
 
-image::ClientServerDeployment.png[ClientServerDeployment,width=600,align=center]
+image::{imagedir}/ClientServerDeployment.png[ClientServerDeployment,width=600,align=center]
 
 ==== Key advantages of server mode
 
@@ -318,7 +317,7 @@ This architecture is more common in OEM setups, where Neo4j runs integrated as p
 This makes it very easy to directly work with the database and get lightning fast performance.
 --
 
-image::EmbeddedDeployment.png[EmbeddedDeployment,width=300,align=center]
+image::{imagedir}/EmbeddedDeployment.png[EmbeddedDeployment,width=300,align=center]
 
 ==== Key advantages of embedded mode
 
@@ -367,15 +366,90 @@ In this training, you will learn how to perform these common administrative task
 * Managing database security
 
 [.title.has-gold-background.has-team-background]
-== *Exercise 1: Accessing the Neo4j Enterprise Edition EC2 instance for this course*
+== *Exercise 1: Setting up Neo4j Enterprise Edition EC2 instance for this course*
 
-//ifndef::backend-html5[]
-Refer to the *Exercise Guide* for instructions.
-//endif::[]
+We are using Neo4j Enterprise Edition for the hands-on exercises in this training, as some Neo4j features are not included in Community Edition.
+The OS that we will use for this training is Debian.
+In your real application environment, the location of files for managing Neo4j and the terminal commands will be different.
+Neo4j Enterprise Edition is available for download with a 30-day evaluation license.
 
-//ifdef::backend-htlm5[]
-//include::exercises/02_OverviewOfNeo4jAdministration.adoc
-//./endif::[]
+ifndef::backend-revealjs[]
+=== Before you begin
+endif::[]
+
+[.notes]
+--
+Ensure that you have been provided with an EC2 instance (IP address) to use by your instructor.
+You will use this EC2 instance throughout this course.
+Follow the steps below, depending on your OS.
+--
+
+ifndef::backend-revealjs[]
+=== Exercise steps (OS X and Linux):
+
+. Download the private key, https://neo4j-training.s3.us-east-2.amazonaws.com/Lab+VM+Files/neo4j-training.pem[neo4j-training.pem] to your system and place it in your home directory.
+. Change permissions on the private key file as follows:
+
+----
+chmod 400 neo4j-training.pem
+----
+
+[start=3]
+. Open a terminal window on your system.
+. Enter the following in the terminal window:
+
+----
+ssh -i neo4j-training.pem ubuntu@<IP address>
+yes
+----
+[start=5]
+. You should now be logged in to the EC2 instance.
+. Find the Neo4j Operations Manual and confirm that the files on your EC2 instance (Debian) match the locations of files in the Operations Manual.
+
+*Hint*: Confirm that files have been installed as described https://neo4j.com/docs/operations-manual/4.0/configuration/file-locations/[here].
+
+image::{imagedir}/OSX-AccessEC2Instance.png[OSX-AccessEC2Instance,width=600,align=center]
+
+=== Exercise steps (Windows):
+
+. Download the private key, https://neo4j-training.s3.us-east-2.amazonaws.com/Lab+VM+Files/neo4j-training.pem[neo4j-training.pem] to your system and place it in your home directory.
+. Download https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html[PuTTY].
+. Install PuTTY by running the install executable using these guidelines:
+    Use defaults everywhere but change it so that it creates a desktop shortcut.
+
+image::{imagedir}/PuTTYInstallOptions.png[PuTTYInstallOptions,width=500,align=center]
+
+[start=4]
+. Open PuTTY.
+.. In *Category* panel, select *SSH*.
+.. Enter the location where you downloaded the private key.
+
+image::{imagedir}/ConfigurePEMPuTTY.png[ConfigurePEMPuTTY,width=400,align=center]
+
+[start=5]
+. Continue in PuttY as follows:
+.. In *Category* panel, expand *SSH* and click *Auth*.
+.. Enter the IP address of the EC2 instance you will be using.
+.. In the *Saved Session* field, enter a memorable name.
+.. Click *Save*. This will enable you to reuse these configuration settings whenever you want to connect to the EC2 instance.
+
+image::{imagedir}/PuTTYSavedSession.png[PuTTYSavedSession,width=500,align=center]
+
+[start=6]
+. Connect to the EC2 instance by clicking *Open*.
+
+image::{imagedir}/OpenEC2FromPuTTY.png[OpenEC2FromPuTTY,width=400,align=center]
+
+[start=7]
+. You should now have a terminal window for the EC2 instance. Enter *ubuntu* to log in.
+
+image::{imagedir}/EC2TerminalFromPuTTY.png[EC2TerminalFromPuTTY,width=600,align=center]
+
+[start=8]
+. Find the Neo4j Operations Manual and confirm that the files on your EC2 instance (Debian) match the locations of files in the Operations Manual.
+
+*Hint*: Confirm that files have been installed as described https://neo4j.com/docs/operations-manual/4.0/configuration/file-locations/[here].
+endif::[]
 
 == References
 

@@ -1,0 +1,86 @@
+[.title.has-gold-background.has-team-background]
+= *Exercise 1: Setting up Neo4j Enterprise Edition EC2 instance for this course*
+ifndef::imagesdir[:imagesdir: ../../images]
+
+We are using Neo4j Enterprise Edition for the hands-on exercises in this training, as some Neo4j features are not included in Community Edition.
+The OS that we will use for this training is Debian.
+In your real application environment, the location of files for managing Neo4j and the terminal commands will be different.
+Neo4j Enterprise Edition is available for download with a 30-day evaluation license.
+
+ifndef::backend-revealjs[]
+== Before you begin
+endif::[]
+
+[.notes]
+--
+Ensure that you have been provided with an EC2 instance (IP address) to use by your instructor.
+You will use this EC2 instance throughout this course.
+Follow the steps below, depending on your OS.
+--
+
+ifndef::backend-revealjs[]
+== Exercise steps (OS X and Linux):
+
+. Download the private key, https://neo4j-training.s3.us-east-2.amazonaws.com/Lab+VM+Files/neo4j-training.pem[neo4j-training.pem] to your system and place it in your home directory.
+. Change permissions on the private key file as follows:
+
+----
+chmod 400 neo4j-training.pem
+----
+
+[start=3]
+. Open a terminal window on your system.
+. Enter the following in the terminal window:
+
+----
+ssh -i neo4j-training.pem ubuntu@<IP address>
+yes
+----
+[start=5]
+. You should now be logged in to the EC2 instance.
+. Find the Neo4j Operations Manual and confirm that the files on your EC2 instance (Debian) match the locations of files in the Operations Manual.
+
+*Hint*: Confirm that files have been installed as described https://neo4j.com/docs/operations-manual/4.0/configuration/file-locations/[here].
+
+image::OSX-AccessEC2Instance.png[OSX-AccessEC2Instance,width=600,align=center]
+
+== Exercise steps (Windows):
+
+. Download the private key, https://neo4j-training.s3.us-east-2.amazonaws.com/Lab+VM+Files/neo4j-training.pem[neo4j-training.pem] to your system and place it in your home directory.
+. Download https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html[PuTTY].
+. Install PuTTY by running the install executable using these guidelines:
+Use defaults everywhere but change it so that it creates a desktop shortcut.
+
+image::PuTTYInstallOptions.png[PuTTYInstallOptions,width=500,align=center]
+
+[start=4]
+. Open PuTTY.
+.. In *Category* panel, select *SSH*.
+.. Enter the location where you downloaded the private key.
+
+image::ConfigurePEMPuTTY.png[ConfigurePEMPuTTY,width=400,align=center]
+
+[start=5]
+. Continue in PuttY as follows:
+.. In *Category* panel, expand *SSH* and click *Auth*.
+.. Enter the IP address of the EC2 instance you will be using.
+.. In the *Saved Session* field, enter a memorable name.
+.. Click *Save*. This will enable you to reuse these configuration settings whenever you want to connect to the EC2 instance.
+
+image::PuTTYSavedSession.png[PuTTYSavedSession,width=500,align=center]
+
+[start=6]
+. Connect to the EC2 instance by clicking *Open*.
+
+image::OpenEC2FromPuTTY.png[OpenEC2FromPuTTY,width=400,align=center]
+
+[start=7]
+. You should now have a terminal window for the EC2 instance. Enter *ubuntu* to log in.
+
+image::EC2TerminalFromPuTTY.png[EC2TerminalFromPuTTY,width=600,align=center]
+
+[start=8]
+. Find the Neo4j Operations Manual and confirm that the files on your EC2 instance (Debian) match the locations of files in the Operations Manual.
+
+*Hint*: Confirm that files have been installed as described https://neo4j.com/docs/operations-manual/4.0/configuration/file-locations/[here].
+endif::[]
