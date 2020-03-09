@@ -49,10 +49,11 @@ require 'json'
       <h1 class="entry-title"><%= attr 'doctitle' %></h1>
       <%= content %>
       <div id="_grade_quiz_and_continue" class="sect1 columns medium-12" style="padding-left: 0;">
-        <h3>Grade Quiz and Continue</h3>
-        <!-- fixme: configure the module link -->
         <div class="paragraph">
-          <a data-type="grade-quiz" data-slug="<%= attr('slug') %>" class="next-section medium button" href="../<%= attr('module-next-slug') %>/">Continue to <%= attr('module-next-title') %></a>
+          <% if attr('module-quiz') == 'true' %>
+            <a data-type="grade-quiz" data-slug="<%= attr('slug') %>" class="medium button secondary"><i class="fa fa-check"></i> Check Answers</a>
+          <% end %>
+          <a class="medium button primary" href="../<%= attr('module-next-slug') %>/"><i class="fa fa-arrow-right" aria-hidden="true"></i> Continue to <%= attr('module-next-title') %></a>
         </div>
         <%
           modules = (@attributes.select { |k, _| k.start_with?('module-quiz-') }.keys.map do |quiz_attr|

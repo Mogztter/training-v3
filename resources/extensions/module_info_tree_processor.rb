@@ -16,9 +16,12 @@ class ModuleInfoTreeProcessor < Extensions::TreeProcessor; use_dsl
           document.set_attribute "module-toc-title-#{index}", page['title']
           document.set_attribute "module-toc-slug-#{index}", page['slug']
           document.set_attribute "module-quiz-#{index}", page['quiz']
-          if page.has_key?('next') && (document_slug == page['slug'])
-            document.set_attr "module-next-slug", page['next']['slug'], false
-            document.set_attr "module-next-title", page['next']['title'], false
+          if document_slug == page['slug']
+            if page.has_key?('next')
+              document.set_attr "module-next-slug", page['next']['slug'], false
+              document.set_attr "module-next-title", page['next']['title'], false
+            end
+            document.set_attribute "module-quiz", page['quiz']
           end
         end
         document.set_attribute "module-name", module_descriptor['module_name']
