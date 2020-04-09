@@ -1,6 +1,62 @@
 <%
 require 'json'
 %>
+<header role="banner" data-swiftype-index="false" class="global-header developer-header">
+  <!-- Skip links for accessibility with screen readers and keyboard users -->
+  <div class="container">
+    <div class="row">
+      <div class="column" style="position: relative;">
+        <a class="skip-link" id="nav-position" href="#content">Skip to content</a>
+      </div>
+    </div>
+  </div>
+  <div class="top-bar-container row column">
+    <div class="title-bar" data-responsive-toggle="responsive-menu" data-hide-for="large">
+      <div class="title-bar-title"><a href="<?php echo home_url(); ?>"><img class="menu-logo__img" src="<?php echo home_url(); ?>/wp-content/themes/neo4jweb/assets/images/neo4j-logo-textreverse.png" alt="The Neo4j Graph Platform – The #1 Platform for Connected Data"/></a></div>
+      <button class="menu-icon" type="button" data-toggle="responsive-menu"></button>
+    </div>
+    <nav class="top-bar primary-nav" role="navigation" id="responsive-menu">
+      <h2 class="show-for-sr">Main Navigation</h2>
+      <div class="top-bar-left">
+        <ul class="menu show-for-large">
+          <li class="menu-logo">
+            <a href="<?php echo home_url(); ?>"><img class="menu-logo__img" src="<?php echo home_url(); ?>/wp-content/themes/neo4jweb/assets/images/neo4j-logo-textreverse.png" alt="The Neo4j Graph Platform – The #1 Platform for Connected Data"/></a>
+          </li>
+        </ul>
+      </div>
+      <div class="top-bar-right">
+        <ul class="menu vertical large-horizontal megamenu-wrapper" data-responsive-menu="drilldown large-dropdown" data-auto-height="true" data-parent-link="false">
+          <!-- new top level menu -->
+          <li class="has-submenu">
+            <a href="https://community.neo4j.com/">Neo4j Community Site</a>
+          </li>
+          <li class="has-submenu">
+            <a href="/docs/">Neo4j Manuals</a>
+          </li>
+          <li class="has-submenu">
+            <a href="https://medium.com/neo4j">Developer Blog</a>
+          </li>
+          <li class="has-submenu">
+            <a href="https://www.youtube.com/neo4j/">Neo4j Videos</a>
+          </li>
+          <li class="has-submenu">
+            <a href="/developer/get-started">Developer Guides</a>
+          </li>
+          <li class="has-submenu">
+            <a href="/labs/">Neo4j Labs</a>
+          </li>
+          <li class="has-form">
+            <form role="search" method="get" id="searchform" class="searchform" action="<?php //echo get_site_url(); ?>/">
+              <label class="show-for-sr">Search Terms</label>
+              <input class="js-search-nav" type="text" name="s" id="s" placeholder="Search"/>
+              <input type="image" id="searchsubmit" style="width:20px;" src="<?php //echo home_url(); ?>/wp-content/themes/neo4jweb/assets/images/search-icon.svg" alt="Submit Search" />
+            </form>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+</header>
 <article id="content" role="main">
   <div class="content-wrapper">
     <div class="dev-menu-nav large-2 hide-for-medium-only hide-for-small-only columns">
