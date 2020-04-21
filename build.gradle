@@ -374,12 +374,21 @@ subprojects {
     }
   }
 
-  if (stage == 'production' || stage == 'testing') {
+  if (project.name == 'knowledge-base') {
     task wordPressUploadCourse(type: WordPressUploadTask) {
       dependsOn convertOnlineHtml
       source = convertOnlineHtml.outputs.files
-      type = "course"
+      type = "faq"
       status = "private"
+    }
+  } else {
+    if (stage == 'production' || stage == 'testing') {
+      task wordPressUploadCourse(type: WordPressUploadTask) {
+        dependsOn convertOnlineHtml
+        source = convertOnlineHtml.outputs.files
+        type = "course"
+        status = "private"
+      }
     }
   }
 

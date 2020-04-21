@@ -1,5 +1,6 @@
 package com.neo4j.gradle.wordpress
 
+import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.KlaxonException
@@ -41,9 +42,18 @@ open class WordPressPlugin : Plugin<Project> {
   }
 }
 
+data class PaginatedResult<T>(val result: List<T>, val hasNext: Boolean)
+
+data class TaxonomyReference(val slug: String, val id: Int)
+
+data class TaxonomyEndpoint(val slug: String, val endpoint: String)
+
+data class Taxonomy(val key: String, val values: List<String>)
+
 data class DocumentAttributes(val slug: String,
                               val title: String,
                               val tags: List<String>,
+                              val taxonomies: List<Taxonomy>,
                               val content: String,
                               val parentPath: String?)
 
@@ -214,6 +224,27 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
       }
     } ?: return false
     val parentIdsByPath = mutableMapOf<String, WordPressDocument?>()
+    val taxonomyReferencesBySlug = if (documentType.name !== "page") {
+      // taxonomies cannot be assigned on a page
+      val taxonomyEndpoints = getTaxonomyEndpoints().map {
+        it.slug to it
+      }.toMap()
+      val taxonomySlugs = documentsWithAttributes.flatMap {
+        it.taxonomies.map { taxonomy -> taxonomy.key }
+      }.toSet()
+     taxonomySlugs.mapNotNull { taxonomySlug ->
+        val taxonomyEndpoint = taxonomyEndpoints[taxonomySlug]
+        if (taxonomyEndpoint == null) {
+          logger.warn("Taxonomy: $taxonomySlug does not exist, unable to set this taxonomy on posts")
+          null
+        } else {
+          val taxonomyReferences = getTaxonomyReferences(taxonomyEndpoint)
+          taxonomySlug to taxonomyReferences.map { it.slug to it.id }.toMap()
+        }
+      }.toMap()
+    } else {
+      emptyMap()
+    }
     for (documentAttributes in documentsWithAttributes) {
       val data = mutableMapOf<String, Any>(
         "date_gmt" to date,
@@ -225,6 +256,18 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
         //"tags" to documentAttributes.tags,
         "type" to documentType
       )
+      for (taxonomy in documentAttributes.taxonomies) {
+        val values = taxonomy.values.mapNotNull { value ->
+          val taxonomyReference = taxonomyReferencesBySlug[taxonomy.key]?.get(value)
+          if (taxonomyReference == null) {
+            logger.warn("Unable to resolve taxonomy id for ${taxonomy.key}/$value on post ${documentAttributes.slug}")
+            null
+          } else {
+            taxonomyReference
+          }
+        }
+        data[taxonomy.key] = values
+      }
       val parentPath = documentAttributes.parentPath
       if (documentType == WordPressDocumentType("page") && parentPath != null) {
         val parentPage = if (parentIdsByPath.containsKey(parentPath)) {
@@ -243,6 +286,7 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
       if (documentTemplate.isNotBlank()) {
         data["template"] = documentTemplate
       }
+      logger.info("data: $data")
       val wordPressDocument = wordPressDocumentsBySlug[documentAttributes.slug]
       if (wordPressDocument != null) {
         // document already exists on WordPress, updating...
@@ -253,6 +297,62 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
       }
     }
     return true
+  }
+
+  private fun getTaxonomyReferences(taxonomyEndpoint: TaxonomyEndpoint): List<TaxonomyReference> {
+    val baseUrl = baseUrlBuilder()
+      .addPathSegment(taxonomyEndpoint.endpoint)
+      .build()
+    return getRecursiveObjects(baseUrl = baseUrl) { result ->
+      result.mapNotNull {
+        if (it is JsonObject) {
+          TaxonomyReference(it["slug"] as String, it["id"] as Int)
+        } else {
+          null
+        }
+      }
+    }
+  }
+
+  private fun getTaxonomyEndpoints(): List<TaxonomyEndpoint> {
+    val searchUrl = baseUrlBuilder()
+      .addPathSegment("taxonomies")
+      .build()
+    val credential = Credentials.basic(connectionInfo.username, connectionInfo.password)
+    val searchRequest = Request.Builder()
+      .url(searchUrl)
+      // force the header because WordPress returns a 400 instead of a 401 when the authentication fails...
+      .header("Authorization", credential)
+      .get()
+      .build()
+    return executeRequest(searchRequest) { responseBody ->
+      try {
+        resolveTaxonomyEndpoints(klaxon.parseJsonObject(responseBody.charStream()))
+      } catch (e: KlaxonException) {
+        logger.error("Unable to parse the response", e)
+        null
+      }
+    }.orEmpty()
+  }
+
+  private fun resolveTaxonomyEndpoints(taxonomies: JsonObject): List<TaxonomyEndpoint> {
+    return taxonomies.keys.mapNotNull { key ->
+      val taxonomyObject = taxonomies[key]
+      if (taxonomyObject is JsonObject) {
+        val types = taxonomyObject["types"]
+        if (types is JsonArray<*>) {
+          if(types.value.contains(documentType.name)) {
+            TaxonomyEndpoint(taxonomyObject.getValue("slug") as String, taxonomyObject.getValue("rest_base") as String)
+          } else {
+            null
+          }
+        } else {
+          null
+        }
+      } else {
+        null
+      }
+    }
   }
 
   private fun findParentPage(parentPath: String, credential: String): WordPressDocument? {
@@ -374,8 +474,9 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
           if (slug != null && title != null) {
             // The terms assigned to the object in the post_tag taxonomy.
             val tags = getTags(attributes)
+            val taxonomies = getTaxonomies(attributes)
             val parentPath = getParentPath(attributes)
-            DocumentAttributes(slug, title, tags, file.readText(Charsets.UTF_8), parentPath)
+            DocumentAttributes(slug, title, tags, taxonomies, file.readText(Charsets.UTF_8), parentPath)
           } else {
             null
           }
@@ -416,6 +517,37 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
     return null
   }
 
+  fun <T> getRecursiveObjects(page: Int = 1, acc: List<T> = emptyList(), baseUrl: HttpUrl, mapper: (response: JsonArray<*>) -> List<T>): List<T> {
+    val searchUrl = baseUrl
+      .newBuilder()
+      .addQueryParameter("page", page.toString())
+      .addQueryParameter("per_page", "100")
+      .build()
+    val credential = Credentials.basic(connectionInfo.username, connectionInfo.password)
+    val searchRequest = Request.Builder()
+      .url(searchUrl)
+      // force the header because WordPress returns a 400 instead of a 401 when the authentication fails...
+      .header("Authorization", credential)
+      .get()
+      .build()
+    val paginatedResult = httpClient.newCall(searchRequest).execute().use { response ->
+      val totalPages = response.header("X-WP-TotalPages", "1")?.toInt() ?: 1
+      val hasNext = totalPages > page
+      response.body.use {
+        if (it != null) {
+          PaginatedResult(mapper(klaxon.parseJsonArray(it.charStream())), hasNext)
+        } else {
+          PaginatedResult(emptyList(), hasNext)
+        }
+      }
+    }
+    return if (paginatedResult.hasNext) {
+      getRecursiveObjects(page + 1, acc + paginatedResult.result, baseUrl, mapper = mapper)
+    } else {
+      acc + paginatedResult.result
+    }
+  }
+
   private fun getMandatoryString(attributes: Map<*, *>, name: String, yamlFilePath: String, fileName: String): String? {
     val value = attributes[name]
     if (value == null) {
@@ -431,6 +563,22 @@ internal class WordPressUpload(val documentType: WordPressDocumentType,
       return null
     }
     return value
+  }
+
+  private fun getTaxonomies(attributes: Map<*, *>): List<Taxonomy> {
+    val value = attributes["taxonomies"] ?: return listOf()
+    return if (value is List<*>) {
+      value.mapNotNull { info ->
+        if (info is Map<*, *>) {
+          @Suppress("UNCHECKED_CAST")
+          Taxonomy(info["key"] as String, info["values"] as List<String>)
+        } else {
+          null
+        }
+      }
+    } else {
+      listOf()
+    }
   }
 
   private fun getTags(attributes: Map<*, *>): List<String> {

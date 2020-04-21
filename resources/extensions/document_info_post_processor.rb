@@ -10,12 +10,26 @@ class DocumentInfoPostProcessor < Extensions::Postprocessor; use_dsl
         info = {}
         tags = []
         if document.attr? 'tags'
-          tags = (document.attr 'tags').split(',').map { |tag| tag.strip! }.reject { |tag| tag.empty? }
+          tags = (document.attr 'tags')
+            .split(',')
+            .map(&:strip)
+            .reject(&:empty?)
         end
         tags << 'public' if document.attr? 'public'
         tags << 'private' if document.attr? 'private'
         unless tags.empty?
           info['tags'] = tags
+        end
+        if document.attr? 'taxonomies'
+          taxonomies = (document.attr 'taxonomies')
+            .split(',')
+            .map(&:strip)
+            .reject(&:empty?)
+            .map { |taxonomy|
+              key, value = taxonomy.split('=')
+              { 'key' => key.strip, 'values' => value.strip.split(';').map(&:strip).reject(&:empty?) }
+            }
+          info['taxonomies'] = taxonomies
         end
         if (slug = document.attr 'slug')
           info['slug'] = slug
