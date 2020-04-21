@@ -21,3 +21,6 @@ project(':apoc').projectDir = file('modules/apoc')
 
 include 'classroom-setup'
 project(':classroom-setup').projectDir = file('modules/classroom-setup')
+
+include 'knowledge-base'
+project(':knowledge-base').projectDir = file('modules/knowledge-base')

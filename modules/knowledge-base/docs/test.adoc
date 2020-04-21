@@ -1,0 +1,6 @@
+= Test
+:slug: test-taxonomies
+:taxonomies: os=linux,programming_language=java,neo4j_version=3-5;3-6
+
+This is a test
+
