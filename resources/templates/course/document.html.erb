@@ -87,6 +87,7 @@ require 'json'
         window.trainingEnrollmentUrl = "<%= attr('module-enrollment-url') %>"
       </script>
       <script src="https://cdn.auth0.com/js/lock/11.23.0/lock.min.js"></script>
+      <script src="https://s3.amazonaws.com/cdn.graphacademy.neo4j.com/dist/login-prod.js"></script>
       <!-- fixme: upload _quizzes.js to s3 -->
       <script>
         <%= File.new("#{__dir__ }/_quizzes.js", mode: 'r:UTF-8').read %>

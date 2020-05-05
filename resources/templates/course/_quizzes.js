@@ -13,6 +13,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var backendBaseUrl = window.trainingBackendBaseUrl
   var enrollmentUrl = window.trainingEnrollmentUrl
+  var logoutUrl = 'http://neo4j.com/accounts/login-b/?targetUrl=' + encodeURI(siteUrl)
+
+  const login = new GraphAcademyLogin({
+    trainingClassName: trainingName,
+    classStates: {
+      loggedIn: 'only-logged-in',
+      notLoggedIn: 'only-not-logged-in',
+      checkingSession: 'only-checking-session',
+    },
+    loginRedirectUrl: siteUrl,
+    logoutOptions: {
+      shouldRedirect: true,
+      redirectTo: logoutUrl
+    }
+  })
 
   function arrayDiff(a, b) {
     return a.filter(function (i) {
@@ -204,41 +219,9 @@ document.addEventListener('DOMContentLoaded', function () {
   updateProgressIndicators(currentQuizStatus)
 
   if (typeof trainingPartName !== 'undefined') {
-    var lock = new Auth0Lock('hoNo6B00ckfAoFVzPTqzgBIJHFHDnHYu', 'login.neo4j.com', {
-        configurationBaseUrl: 'https://cdn.auth0.com',
-        allowedConnections: ['google-oauth2', 'linkedin', 'twitter', 'Username-Password-Authentication'],
-        additionalSignUpFields: [
-          {
-            name: 'first_name',
-            placeholder: 'First Name'
-          },
-          {
-            name: 'last_name',
-            placeholder: 'Last Name'
-          }
-        ],
-        closable: false,
-        languageDictionary: {
-          signUpTerms: "I agree to the <a href='https://neo4j.com/terms/online-trial-agreement/' style='text-decoration: underline' target='_blank'>terms of service</a> of Neo4j."
-        },
-        mustAcceptTerms: true,
-        auth: {
-          redirect: true,
-          redirectUrl: 'https://neo4j.com/accounts/login',
-          responseType: 'token id_token',
-          audience: 'neo4j://accountinfo/',
-          params: {
-            scope: 'read:account-info write:account-info openid email profile user_metadata'
-          }
-        }
-      }
-    )
     var accessToken
-    lock.checkSession({}, function (err, authResult) {
-      if (err) {
-        console.error('User is not authenticated', err)
-        logout()
-      } else if (authResult && authResult.accessToken) {
+    login.checkSession(function (err, authResult) {
+      if (authResult && authResult.accessToken) {
         // we're authenticated!
         accessToken = authResult.accessToken
         // get the enrollment status
