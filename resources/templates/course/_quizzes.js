@@ -229,7 +229,8 @@ document.addEventListener('DOMContentLoaded', function () {
           audience: 'neo4j://accountinfo/',
           params: {
             scope: 'read:account-info write:account-info openid email profile user_metadata'
-          }
+          },
+          sso: false
         }
       }
     )
