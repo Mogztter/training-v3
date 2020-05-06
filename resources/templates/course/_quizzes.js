@@ -77,12 +77,17 @@ document.addEventListener('DOMContentLoaded', function () {
     })
   }
 
-  function updatePageQuiz() {
+  function updatePageQuiz(gradeQuizActionStatus) {
     // && is (somehow) encoded as &#38;
     if (currentQuizStatus) {
       if (currentQuizStatus.passed) {
         if (currentQuizStatus.passed.indexOf(trainingPartName) !== -1) {
-          gradeQuizActionElement.hide()
+          if (gradeQuizActionStatus === 'disabled') {
+            // disable the button to avoid disruption in the UI
+            gradeQuizActionElement.prop('disabled', true);
+          } else {
+            gradeQuizActionElement.hide()
+          }
           quizElement.find('.required-answer').each(function () {
             $(this).prev(':checkbox').prop('checked', true)
           })
@@ -182,6 +187,8 @@ document.addEventListener('DOMContentLoaded', function () {
     setQuizStatus(currentQuizStatus['passed'], currentQuizStatus['failed'], accessToken)
       .then(() => {
         window.localStorage.setItem(quizStatusLocalStorageKey, JSON.stringify(currentQuizStatus))
+        updateProgressIndicators(currentQuizStatus)
+        updatePageQuiz('disabled')
       })
       .catch(function (error) {
         // question: what should we do? display an error message to the user?
@@ -193,7 +200,18 @@ document.addEventListener('DOMContentLoaded', function () {
   var currentQuizStatus
   var quizStatus = window.localStorage.getItem(quizStatusLocalStorageKey)
   if (quizStatus) {
-    currentQuizStatus = JSON.parse(quizStatus)
+    try {
+      currentQuizStatus = JSON.parse(quizStatus)
+    } catch (e) {
+      // unable to parse the value of the quiz status from the localStorage, resetting...
+      console.warn("Unable to parse the value of the quiz status from the localStorage, resetting...")
+      window.localStorage.removeItem(quizStatusLocalStorageKey)
+      currentQuizStatus = {
+        failed: [],
+        passed: [],
+        untried: trainingModules
+      }
+    }
   } else {
     currentQuizStatus = {
       failed: [],
@@ -202,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   updateProgressIndicators(currentQuizStatus)
+  updatePageQuiz()
 
   if (typeof trainingPartName !== 'undefined') {
     var lock = new Auth0Lock('hoNo6B00ckfAoFVzPTqzgBIJHFHDnHYu', 'login.neo4j.com', {
@@ -254,29 +273,32 @@ document.addEventListener('DOMContentLoaded', function () {
           .catch(function (error) {
             console.error('Unable to get enrollment', error)
           })
-        // get the current quiz status from the server
-        getQuizStatus(accessToken)
-          .then(function (response) {
-            var quizStatus = response['quizStatus']
-            if (quizStatus) {
-              var failed = quizStatus['failed']
-              var passed = quizStatus['passed']
-              var untried = arrayDiff(arrayDiff(trainingModules, failed), passed)
-              currentQuizStatus = {
-                failed: failed,
-                passed: passed,
-                untried: untried
+        // if the quiz status is not available from the localStorage, get the current quiz status from the server
+        var quizStatus = window.localStorage.getItem(quizStatusLocalStorageKey)
+        if (quizStatus === null) {
+          getQuizStatus(accessToken)
+            .then(function (response) {
+              var quizStatus = response['quizStatus']
+              if (quizStatus) {
+                var failed = quizStatus['failed']
+                var passed = quizStatus['passed']
+                var untried = arrayDiff(arrayDiff(trainingModules, failed), passed)
+                currentQuizStatus = {
+                  failed: failed,
+                  passed: passed,
+                  untried: untried
+                }
+                window.localStorage.setItem(quizStatusLocalStorageKey, JSON.stringify(currentQuizStatus))
+                updateProgressIndicators(currentQuizStatus)
+                updatePageQuiz()
+              } else {
+                console.warn('Unable to update the current quiz status, response from the server is empty', response)
               }
-              window.localStorage.setItem(quizStatusLocalStorageKey, JSON.stringify(currentQuizStatus))
-              updateProgressIndicators(currentQuizStatus)
-              updatePageQuiz()
-            } else {
-              console.warn('Unable to update the current quiz status, response from the server is empty', response)
-            }
-          })
-          .catch(function (error) {
-            console.error('Unable to get quiz status', error)
-          })
+            })
+            .catch(function (error) {
+              console.error('Unable to get quiz status', error)
+            })
+        }
         var certificateResultElement = document.querySelector('[data-certificate-result]')
         if (certificateResultElement) {
           // get the certificate
