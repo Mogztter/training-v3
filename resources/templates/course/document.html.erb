@@ -86,7 +86,7 @@ require 'json'
         window.trainingBackendBaseUrl = 'https://nmae7t4ami.execute-api.us-east-1.amazonaws.com/prod'
         window.trainingEnrollmentUrl = "<%= attr('module-enrollment-url') %>"
       </script>
-      <script src="https://cdn.auth0.com/js/lock/11.23.0/lock.min.js"></script>
+      <script src="https://cdn.auth0.com/js/auth0/9.11/auth0.min.js"></script>
       <!-- fixme: upload _quizzes.js to s3 -->
       <script>
         <%= File.new("#{__dir__ }/_quizzes.js", mode: 'r:UTF-8').read %>

@@ -1,4 +1,4 @@
-/* global $, jwt_decode */
+/* global $, WebAuth */
 document.addEventListener('DOMContentLoaded', function () {
 
   var gradeQuizActionElement = $('[data-action="grade-quiz"]')
@@ -204,37 +204,16 @@ document.addEventListener('DOMContentLoaded', function () {
   updateProgressIndicators(currentQuizStatus)
 
   if (typeof trainingPartName !== 'undefined') {
-    var lock = new Auth0Lock('hoNo6B00ckfAoFVzPTqzgBIJHFHDnHYu', 'login.neo4j.com', {
-        configurationBaseUrl: 'https://cdn.auth0.com',
-        allowedConnections: ['google-oauth2', 'linkedin', 'twitter', 'Username-Password-Authentication'],
-        additionalSignUpFields: [
-          {
-            name: 'first_name',
-            placeholder: 'First Name'
-          },
-          {
-            name: 'last_name',
-            placeholder: 'Last Name'
-          }
-        ],
-        closable: false,
-        languageDictionary: {
-          signUpTerms: "I agree to the <a href='https://neo4j.com/terms/online-trial-agreement/' style='text-decoration: underline' target='_blank'>terms of service</a> of Neo4j."
-        },
-        mustAcceptTerms: true,
-        auth: {
-          redirect: true,
-          redirectUrl: 'https://neo4j.com/accounts/login',
-          responseType: 'token id_token',
-          audience: 'neo4j://accountinfo/',
-          params: {
-            scope: 'read:account-info write:account-info openid email profile user_metadata'
-          }
-        }
-      }
-    )
+    var webAuth = new WebAuth({
+      clientID: 'hoNo6B00ckfAoFVzPTqzgBIJHFHDnHYu',
+      domain: 'login.neo4j.com',
+      redirectUri: `${window.location.origin}/accounts/login`,
+      audience: 'neo4j://accountinfo/',
+      scope: 'read:account-info openid email profile user_metadata',
+      responseType: 'token id_token'
+    })
     var accessToken
-    lock.checkSession({}, function (err, authResult) {
+    webAuth.checkSession({}, function (err, authResult) {
       if (err) {
         console.error('User is not authenticated', err)
         logout()
