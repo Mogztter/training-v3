@@ -12,10 +12,7 @@ repositories {
 
 dependencies {
   implementation("org.asciidoctor:asciidoctorj:2.2.0")
-  implementation("com.amazonaws:aws-java-sdk-s3:1.11.714")
-  implementation("com.squareup.okhttp3:okhttp:4.4.0")
   implementation("org.yaml:snakeyaml:1.25")
-  implementation("com.beust:klaxon:5.0.1")
   implementation(gradleApi())
 }
 
@@ -27,12 +24,6 @@ fun isPluginEnabled(name: String): Boolean = pluginsEnabled == null || pluginsEn
 
 gradlePlugin {
   plugins {
-    if (isPluginEnabled("s3")) {
-      create("s3Plugin") {
-        id = "com.neo4j.gradle.s3.S3Plugin"
-        implementationClass = "com.neo4j.gradle.s3.S3Plugin"
-      }
-    }
     if (isPluginEnabled("asciidoctorModuleDescriptor")) {
       create("asciidoctorModuleDescriptorPlugin") {
         id = "com.neo4j.gradle.asciidoctor.AsciidoctorModuleDescriptorPlugin"
@@ -47,15 +38,6 @@ pluginBundle {
   vcsUrl = "https://github.com/neo4j-contrib/training-v3"
 
   (plugins) {
-    if (isPluginEnabled("s3")) {
-      "s3Plugin" {
-        id = "com.neo4j.gradle.s3.S3Plugin"
-        displayName = "Publish files to Amazon S3"
-        description = "A plugin to publish files to Amazon S3"
-        version = "0.0.1"
-        tags = listOf("s3", "publish", "files")
-      }
-    }
     // should be a private plugin
     if (isPluginEnabled("asciidoctorModuleDescriptor")) {
       "asciidoctorModuleDescriptorPlugin" {
