@@ -136,6 +136,14 @@ Then follow instructions for Exercise 1.
 [.guided-exercise]
 == Guided Exercise: Getting Started with the Weakly Connected Component algorithm
 
+[.guided-exercise]
+== Guided Exercise: Creating a new database
+
+. In Neo4j Browser, select the system database.
+. Create the new movies database in the query edit pane with `CREATE DATABASE Movies`
+. Enter the browser command `:dbs` in the query edit pane to see the list of existing databases.
+. Enter the browser command `:use movies` to switch to this newly created, empty database.
+
 [.student-exercise]
 == Task: Create a new database called `stackoverflow` and switch to it
 
