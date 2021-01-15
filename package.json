@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Neo4j GraphAcademy",
   "scripts": {
+    "lint": "node resources/tasks/lint-links.js",
     "start": "node resources/tasks/start.js",
     "watch": "node resources/tasks/watch.js",
     "build": "antora local-antora-playbook.yml --generator @neo4j/developer-site-generator"
@@ -24,7 +25,8 @@
     "browser-sync": "^2.26.12",
     "cheerio": "^1.0.0-rc.3",
     "chokidar": "^3.4.2",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "hyperlink": "^4.6.0"
   },
   "private": true
 }

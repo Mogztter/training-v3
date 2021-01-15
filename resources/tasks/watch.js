@@ -1,5 +1,5 @@
 const chokidar = require('chokidar')
-const bs = require("browser-sync").create()
+const bs = require('browser-sync').create()
 const generator = require('@neo4j/developer-site-generator')
 const Lock = require('./extra/lock.js')
 const processorLock = new Lock()
@@ -67,6 +67,7 @@ watcher.on('unlink', async e => await generate(e))
 ;(async () => {
   await generate()
   bs.init({
+    startPath: '/graphacademy/',
     server: './public'
   })
 })()

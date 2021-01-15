@@ -189,11 +189,11 @@ The above commands will install the dependencies.
 
 === Tasks
 
-Build and publish the site in _public_ directory:
+Build and publish the site in _public/graphacademy_ directory:
 
  $ npm run build
 
-Start a local server to serve the _public_ directory:
+Start a local server to serve the _public/graphacademy_ directory:
 
  $ npm run start
 

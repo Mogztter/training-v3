@@ -29,7 +29,7 @@ content:
 
 
 output:
-  dir: ./public/
+  dir: ./public/graphacademy/
 
 ui:
   bundle:
@@ -45,6 +45,7 @@ asciidoc:
     page-component: training
     page-theme: training
     page-disabletracking: true
+    page-canonical-root: /graphacademy
     page-breadcrumbs:
       - name: Neo4j Training
-        url: /online-training
+        url: /graphacademy/online-training
